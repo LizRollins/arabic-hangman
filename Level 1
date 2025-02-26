@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الحروف المفقودة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        #word-display {
+            font-size: 32px;
+            letter-spacing: 10px;
+            margin: 20px;
+        }
+        #hint {
+            font-size: 20px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        #letters {
+            margin-top: 20px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #hangman {
+            font-size: 24px;
+            margin: 20px;
+            white-space: pre;
+        }
+        #message {
+            font-size: 24px;
+            color: red;
+        }
+        #restart {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>لعبة الحروف المفقودة</h1>
+    <p>اختر مستوى الصعوبة:</p>
+    <button onclick="startGame()">1️⃣ مستوى المبتدئين</button>
+
+    <div id="hangman" style="display:none;">🟦</div>
+    <div id="hint"></div>
+    <div id="word-display"></div>
+    <div id="letters"></div>
+    <p id="message"></p>
+    <button id="restart" onclick="restartGame()">🔄 إعادة المحاولة</button>
+
+    <script>
+        const words = [
+            { word: "السلام عليكم", english: "Hello / Peace be upon you" },
+            { word: "وعليكم السلام", english: "Hello (response)" },
+            { word: "مرحبا", english: "Hello" },
+            { word: "أهلا وسهلا", english: "Welcome" },
+            { word: "كيفك؟", english: "How are you?" },
+            { word: "دلوقتي", english: "Now" },
+            { word: "بحب", english: "I love / I like" },
+            { word: "عايز", english: "I want (m)" },
+            { word: "كمان", english: "Also" },
+            { word: "شو؟", english: "What?" },
+            { word: "وين؟", english: "Where?" },
+            { word: "مع السلامة", english: "Goodbye" },
+            { word: "ذلحين", english: "Now (Yemeni)" },
+            { word: "ايش؟", english: "What? (Yemeni)" },
+            { word: "تشتي أي شيء؟", english: "Would you like anything?" },
+            { word: "كتقرا", english: "She studies (Moroccan)" },
+            { word: "كيعجبها", english: "She likes (Moroccan)" }
+        ];
+
+        let chosenEntry, chosenWord, guessedWord, wrongGuesses = 0, maxGuesses = 6;
+        const hangmanStages = ["🟦", "🟦💀", "🟦💀🦴", "🟦💀🦴🦴", "🟦💀🦴🦴👣", "🟦💀🦴🦴👣👣"];
+
+        function startGame() {
+            document.getElementById("hangman").style.display = "block";
+            document.getElementById("letters").innerHTML = "";
+            document.getElementById("message").textContent = "";
+            document.getElementById("restart").style.display = "none";
+
+            chosenEntry = words[Math.floor(Math.random() * words.length)];
+            chosenWord = chosenEntry.word;
+            guessedWord = Array.from(chosenWord, char => char === " " ? " " : "_");
+            wrongGuesses = 0;
+
+            document.getElementById("hint").textContent = "🔎 ترجمة: " + chosenEntry.english;
+            document.getElementById("word-display").textContent = guessedWord.join(" ");
+            document.getElementById("hangman").textContent = "🟦";
+
+            const arabicLetters = "ابتثجحخدذرزسشصضطظعغفقكلمنهوي";
+            arabicLetters.split("").forEach(letter => {
+                let button = document.createElement("button");
+                button.textContent = letter;
+                button.onclick = () => guessLetter(letter, button);
+                document.getElementById("letters").appendChild(button);
+            });
+        }
+
+        function guessLetter(letter, button) {
+            button.disabled = true;
+            if (chosenWord.includes(letter)) {
+                for (let i = 0; i < chosenWord.length; i++) {
+                    if (chosenWord[i] === letter) guessedWord[i] = letter;
+                }
+                document.getElementById("word-display").textContent = guessedWord.join(" ");
+            } else {
+                wrongGuesses++;
+                document.getElementById("hangman").textContent = hangmanStages[Math.min(wrongGuesses, maxGuesses)];
+            }
+            checkGameStatus();
+        }
+
+        function checkGameStatus() {
+            if (!guessedWord.includes("_")) {
+                document.getElementById("message").textContent = "🎉 فزت! الكلمة كانت: " + chosenWord;
+                disableAllButtons();
+                document.getElementById("restart").style.display = "block";
+            } else if (wrongGuesses >= maxGuesses) {
+                document.getElementById("message").textContent = "😢 خسرت! الكلمة كانت: " + chosenWord;
+                disableAllButtons();
+                document.getElementById("restart").style.display = "block";
+            }
+        }
+
+        function disableAllButtons() {
+            document.querySelectorAll("button").forEach(btn => btn.disabled = true);
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+    </script>
+
+</body>
+</html>
